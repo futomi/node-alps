@@ -1,0 +1,43 @@
+{
+  "name": "node-alps",
+  "version": "0.0.1",
+  "description": "node-alps は、アルプス電気社製「センサネットワークモジュール 開発キット」に BLE でアクセスするための node モジュールです。",
+  "main": "./lib/alps.js",
+  "files": [
+    "lib"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ALPS",
+    "sensor",
+    "temperature",
+    "humidity",
+    "ambient",
+    "pressure",
+    "accelerometer",
+    "magnetometer",
+    "noise",
+    "BLE",
+    "Bluetooth Low Energy",
+    "Bluetooth smart",
+    "Bluetooth",
+    "IoT",
+    "Internet of Things"
+  ],
+  "homepage": "https://github.com/futomi",
+  "author": "Futomi Hatano <futomi.hatano@gmail.com> (https://github.com/futomi)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/futomi/node-alps.git"
+  },
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "noble": ">=1.8.1"
+  }
+}
