@@ -633,24 +633,24 @@ device.startMonitor({
 
 受信データは、以下の通りです。
 
-プロパティ            | {}            | 型     | 説明 
-:--------------------|:--------------|:-------|-----------------------------
-`pressure`           |               | Number | 大気圧 (hPa)
-`humidity`           |               | Number | 湿度 (%RH)
-`temperature`        |               | Number | 温度 (degC)
-`uv`                 |               | Number | UV (mW/cm^2)
-`ambient`            |               | Number | 太陽光またはハロゲンランプを光源とした場合の照度 (Lx)
-`ambientLed`         |               | Number | LED を光源とした場合の照度 (Lx)
-`ambientFluorescent` |               | Number | 蛍光灯を光源とした場合の照度 (Lx)
-`timeStamp`          |               | Object | 計測時間
-                     | `day`         | Number | 日
-                     | `month`       | Number | 月
-                     | `year`        | Number | 西暦
-                     | `millisecond` | Number | ミリ秒
-                     | `second`      | Number | 秒
-                     | `minute`      | Number | 分
-                     | `hour`        | Number | 時
-`dataIndex`          |               | Number | センサ計測シーケンス番号
+プロパティ            | 型     | 説明 
+:--------------------|:-------|-----------------------------
+`pressure`           | Number | 大気圧 (hPa)
+`humidity`           | Number | 湿度 (%RH)
+`temperature`        | Number | 温度 (degC)
+`uv`                 | Number | UV (mW/cm^2)
+`ambient`            | Number | 太陽光またはハロゲンランプを光源とした場合の照度 (Lx)
+`ambientLed`         | Number | LED を光源とした場合の照度 (Lx)
+`ambientFluorescent` | Number | 蛍光灯を光源とした場合の照度 (Lx)
+`timeStamp`          | Object | 計測時間
+ +- `day`            | Number | 日
+ +- `month`          | Number | 月
+ +- `year`           | Number | 西暦
+ +- `millisecond`    | Number | ミリ秒
+ +- `second`         | Number | 秒
+ +- `minute`         | Number | 分
+ +- `hour`           | Number | 時
+`dataIndex`          | Number | センサ計測シーケンス番号
 
 ```JavaScript
 {
@@ -700,22 +700,22 @@ device.startMonitor({
 
 受信データは、以下の通りです。
 
-プロパティ      | {}            | 型     | 説明 
-:--------------|:--------------|:-------|-----------------------------
-`geoMagnetic`  |               | Object | 地磁気センサーの情報
-               | `x`           | Number | x 軸地磁気 (uT)
-               | `y`           | Number | y 軸地磁気 (uT)
-               | `z`           | Number | z 軸地磁気 (uT)
-`acceleration` |               | Object | 加速度センサーの情報
-               | `x`           | Number | x 軸加速度 (G)
-               | `y`           | Number | y 軸加速度 (G)
-               | `z`           | Number | z 軸加速度 (G)
-`timeStamp`    |               | Object | 計測時間
-               | `millisecond` | Number | ミリ秒
-               | `second`      | Number | 秒
-               | `minute`      | Number | 分
-               | `hour`        | Number | 時
-`dataIndex`    |               | Number | センサ計測シーケンス番号
+プロパティ        | 型     | 説明 
+:----------------|:-------|-----------------------------
+`geoMagnetic`    | Object | 地磁気センサーの情報
++- `x`           | Number | x 軸地磁気 (uT)
++- `y`           | Number | y 軸地磁気 (uT)
++- `z`           | Number | z 軸地磁気 (uT)
+`acceleration`   | Object | 加速度センサーの情報
++- `x`           | Number | x 軸加速度 (G)
++- `y`           | Number | y 軸加速度 (G)
++- `z`           | Number | z 軸加速度 (G)
+`timeStamp`      | Object | 計測時間
++- `millisecond` | Number | ミリ秒
++- `second`      | Number | 秒
++- `minute`      | Number | 分
++- `hour`        | Number | 時
+`dataIndex`      | Number | センサ計測シーケンス番号
 
 ```JavaScript
 {
@@ -782,25 +782,25 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 
 #### 環境系センサーフォーマット
 
-プロパティ      | {}  | 型     | 説明 
-:--------------|:----|:-------|-----------------------------
-`id`           |     | String | デバイスの ID
-`uuid`         |     | String | デバイスの UUID
-`address`      |     | String | デバイスのアドレス
-`localName`    |     | String | デバイスのローカル名
-`rssi`         |     | Number | RSSI
-`companyId`    |     | String | Bluetooth SIG に登録された企業 ID (`0272` 固定)
-`acceleration` |     | Object | 加速度センサーの情報
-               | `x` | Number | x 軸加速度 (G)
-               | `y` | Number | y 軸加速度 (G)
-               | `z` | Number | z 軸加速度 (G)
-`pressure`     |     | Number | 大気圧 (hPa)
-`humidity`     |     | Number | 湿度 (%RH)
-`temperature`  |     | Number | 温度 (degC)
-`uv`           |     | Number | UV (mW/cm^2)
-`ambient`      |     | Number | 太陽光またはハロゲンランプを光源とした場合の照度 (Lx)
-`ambientLed`   |     | Number | LED を光源とした場合の照度 (Lx)
-`ambientFluorescent` | | Number | 蛍光灯を光源とした場合の照度 (Lx)
+プロパティ            | 型     | 説明 
+:--------------------|:-------|-----------------------------
+`id`                 | String | デバイスの ID
+`uuid`               | String | デバイスの UUID
+`address`            | String | デバイスのアドレス
+`localName`          | String | デバイスのローカル名
+`rssi`               | Number | RSSI
+`companyId`          | String | Bluetooth SIG に登録された企業 ID (`0272` 固定)
+`acceleration`       | Object | 加速度センサーの情報
++- `x`               | Number | x 軸加速度 (G)
++- `y`               | Number | y 軸加速度 (G)
++- `z`               | Number | z 軸加速度 (G)
+`pressure`           | Number | 大気圧 (hPa)
+`humidity`           | Number | 湿度 (%RH)
+`temperature`        | Number | 温度 (degC)
+`uv`                 | Number | UV (mW/cm^2)
+`ambient`            | Number | 太陽光またはハロゲンランプを光源とした場合の照度 (Lx)
+`ambientLed`         | Number | LED を光源とした場合の照度 (Lx)
+`ambientFluorescent` | Number | 蛍光灯を光源とした場合の照度 (Lx)
 
 ```JavaScript
 {
@@ -827,23 +827,23 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 
 #### モーション系センサーフォーマット
 
-プロパティ      | {}  | 型     | 説明 
-:--------------|:----|:-------|-----------------------------
-`id`           |     | String | デバイスの ID
-`uuid`         |     | String | デバイスの UUID
-`address`      |     | String | デバイスのアドレス
-`localName`    |     | String | デバイスのローカル名
-`rssi`         |     | Number | RSSI
-`companyId`    |     | String | Bluetooth SIG に登録された企業 ID (`0272` 固定)
-`acceleration` |     | Object | 加速度センサーの情報
-               | `x` | Number | x 軸加速度 (G)
-               | `y` | Number | y 軸加速度 (G)
-               | `z` | Number | z 軸加速度 (G)
-`geoMagnetic`  |     | Object | 地磁気センサーの情報
-               | `x` | Number | x 軸地磁気 (uT)
-               | `y` | Number | y 軸地磁気 (uT)
-               | `z` | Number | z 軸地磁気 (uT)
-`pressure`     |     | Number | 大気圧 (hPa)
+プロパティ      | 型     | 説明 
+:--------------|:-------|-----------------------------
+`id`           | String | デバイスの ID
+`uuid`         | String | デバイスの UUID
+`address`      | String | デバイスのアドレス
+`localName`    | String | デバイスのローカル名
+`rssi`         | Number | RSSI
+`companyId`    | String | Bluetooth SIG に登録された企業 ID (`0272` 固定)
+`acceleration` | Object | 加速度センサーの情報
++- `x`         | Number | x 軸加速度 (G)
++- `y`         | Number | y 軸加速度 (G)
++- `z`         | Number | z 軸加速度 (G)
+`geoMagnetic`  | Object | 地磁気センサーの情報
++- `x`         | Number | x 軸地磁気 (uT)
++- `y`         | Number | y 軸地磁気 (uT)
++- `z`         | Number | z 軸地磁気 (uT)
+`pressure`     | Number | 大気圧 (hPa)
 
 ```JavaScript
 {
