@@ -41,6 +41,7 @@ $ npm install node-alps
   * [setBeaconMode(*params*) メソッド](#AlpsDevice-setBeaconMode-method)
   * [startMonitor([params]) メソッド](#AlpsDevice-startMonitor-method)
   * [stopMonitor() メソッド](#AlpsDevice-stopMonitor-method)
+  * [getStatus() メソッド](#AlpsDevice-getStatus-method)
 * [`AlpsAdvertisement` オブジェクト](#AlpsAdvertisement-object)
   * [Normal Advertising モード](#AlpsAdvertisement-object-Normal)
   * [Sensor Beacon モード](#AlpsAdvertisement-object-Sensor)
@@ -751,6 +752,51 @@ device.stopMonitor().then(() => {
 });
 ```
 
+### <a id="AlpsDevice-getStatus-method">getStatus() メソッド</a>
+
+`getStatus()` メソッドは、バッテリー電圧、エラー情報などのデバイスの状態を取得します。このメソッドは `Promise` オブジェクトを返します。
+
+```JavaScript
+device.getStatus().then((data) => {
+  console.log(JSON.stringify(data, null, '  '));
+}).catch((error) => {
+  console.error(error);
+});
+```
+
+上記コードは、以下のような結果を出力します：
+
+```JavaScript
+{
+  "error": {
+    "pressure": false,
+    "uv": false,
+    "humidity": false,
+    "magnetic": false,
+    "acceleration": false
+  },
+  "rssi": -35,
+  "battery": 3139,
+  "memFull": false,
+  "ack": 1
+}
+```
+
+受信データは、以下の通りです。
+
+プロパティ         | 型      | 説明
+:-----------------|:--------|-----------------------------
+`error`           | Object  | 
++- `pressure`     | Boolean | 気圧異常 (異常なら `true`、正常なら `false` がセットされます)
++- `uv`           | Boolean | UV 異常 (異常なら `true`、正常なら `false` がセットされます)
++- `humidity`     | Boolean | 湿度異常 (異常なら `true`、正常なら `false` がセットされます)
++- `magnetic`     | Boolean | 地磁気異常 (異常なら `true`、正常なら `false` がセットされます)
++- `acceleration` | Boolean | 加速度異常 (異常なら `true`、正常なら `false` がセットされます)
+`rssi`            | Number  | モジュール側の受信 RSSI (単位: dBm)
+`battery`         | Number  | バッテリ電圧 (単位: mV)
+`memFull`         | Boolean | 内部メモリフルフラグ (フルなら `true`、そうでなければ `false` がセットされます)
+`ack`             | Number  | コマンドが正常に受け付けられたなら `1` (ACK)、コマンドの受付が許可されなかったら `2` (NACK)、それ以外(自動発行) なら `0` がセットされます。
+
 ---------------------------------------
 ## <a id="AlpsAdvertisement-object">`AlpsAdvertisement` オブジェクト</a>
 
@@ -896,6 +942,9 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 ---------------------------------------
 ## <a id="Release-note">リリースノート</a>
 
+* v0.1.0 (2018-05-17)
+  * [`getStatus()`](#AlpsDevice-getStatus-method") メソッドを新たにサポートしました。
+
 * v0.0.1 (2017-05-08)
   * First public release
 
@@ -910,7 +959,7 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 
 The MIT License (MIT)
 
-Copyright (c) 2017 Futomi Hatano
+Copyright (c) 2017-2018 Futomi Hatano
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
