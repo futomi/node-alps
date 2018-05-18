@@ -943,7 +943,7 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 ## <a id="Release-note">リリースノート</a>
 
 * v0.1.0 (2018-05-17)
-  * [`getStatus()`](#AlpsDevice-getStatus-method") メソッドを新たにサポートしました。
+  * [`getStatus()`](#AlpsDevice-getStatus-method) メソッドを新たにサポートしました。
 
 * v0.0.1 (2017-05-08)
   * First public release
