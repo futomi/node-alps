@@ -1006,7 +1006,7 @@ Property       | Type    | Description
 ## <a id="Release-note">Release Note</a>
 
 * v0.2.0 (2018-06-30)
-  * Deprecated the [`connected`](#AlpsDevice-properties) property of the [`AlpsDevice`](#AlpsDevice) object.
+  * Deprecated the [`connected`](#AlpsDevice-properties) property of the [`AlpsDevice`](#AlpsDevice-object) object.
   * Newly added the [`isConnected()`](#AlpsDevice-isConnected-method), [`getDeviceName()`](#AlpsDevice-getDeviceName-method), [`setDeviceName()`](#AlpsDevice-setDeviceName-method)  method.
   * Newly created an English-version README.md (this document). The japanese version was renamed to [`README_ja.md`](README_ja.md).
 * v0.1.0 (2018-05-17)
