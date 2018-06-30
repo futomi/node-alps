@@ -5,7 +5,7 @@ node-alps
 
 node-alps は、アルプス電気社製「[センサネットワークモジュール 開発キット](http://www.alps.com/j/iotsmart-network/index.html)」に BLE でアクセスするための node モジュールです。
 
-[![ALPS Sensor Network Module Evaluation Kit](imgs/alps_s.jpg)](img/alps_l.jpg)
+[![ALPS Sensor Network Module Evaluation Kit](imgs/alps_s.jpg)](imgs/alps_l.jpg)
 
 アルプス電気社製「[センサネットワークモジュール 開発キット](http://www.alps.com/j/iotsmart-network/index.html)」は、モーションデータや環境データを取得するための多機能センサーモジュールです。このデバイスには、加速度センサー、磁気センサー、大気圧センサー、湿度センサー、温度センサー、UV センサー、照度センサーが搭載されています。node-alps は、設定変更、通知受信、アドバタイジングパケットのスキャンなどの API を提供します。
 

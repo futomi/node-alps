@@ -5,7 +5,7 @@ node-alps
 
 The node-alps is a Node.js module which allows you to communicate with the [ALPS Sensor Network Module Evaluation Kit](https://www.alps.com/e/iotsmart-network/) via BLE.
 
-[![ALPS Sensor Network Module Evaluation Kit](imgs/alps_s.jpg)](img/alps_l.jpg)
+[![ALPS Sensor Network Module Evaluation Kit](imgs/alps_s.jpg)](imgs/alps_l.jpg)
 
 The [ALPS Sensor Network Module Evaluation Kit](https://www.alps.com/e/iotsmart-network/) is a multi-function sensor module for acquisition and transmission of motion and environmental data. The device contains an accelerometer sensor, a geo-magnetic sensor, a pressure sensor, a humidity sensor, a temperature sensor, a UV sensor, an ambient light sensor. The node-alps exposes APIs which sets configurations, listens to notifications, scans advertising packets, and so on.
 
