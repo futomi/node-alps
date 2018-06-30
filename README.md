@@ -1,16 +1,22 @@
 node-alps
 ===============
 
-node-alps は、アルプス電気社製「[センサネットワークモジュール 開発キット](http://www.alps.com/j/iotsmart-network/index.html)」に BLE でアクセスするための node モジュールです。
+[[Japanese (日本語)](README_ja.md)]
 
-※ 本モジュールはアルプス電気社公式の node モジュールではありません。
+The node-alps is a Node.js module which allows you to communicate with the [ALPS Sensor Network Module Evaluation Kit](https://www.alps.com/e/iotsmart-network/) via BLE.
 
-## 依存関係
+[![ALPS Sensor Network Module Evaluation Kit](imgs/alps_s.jpg)](img/alps_l.jpg)
+
+The [ALPS Sensor Network Module Evaluation Kit](https://www.alps.com/e/iotsmart-network/) is a multi-function sensor module for acquisition and transmission of motion and environmental data. The device contains an accelerometer sensor, a geo-magnetic sensor, a pressure sensor, a humidity sensor, a temperature sensor, a UV sensor, an ambient light sensor. The node-alps exposes APIs which sets configurations, listens to notifications, scans advertising packets, and so on.
+
+Note that this module is *not* an ALPS official SDK.
+
+## Dependencies
 
 * [Node.js](https://nodejs.org/en/) 6 +
 * [noble](https://www.npmjs.com/package/noble)
 
-## インストール
+## Installation
 
 ```
 $ cd ~
@@ -19,115 +25,118 @@ $ npm install node-alps
 ```
 
 ---------------------------------------
-## 目次
+## Table of Contents
 
-* [クイックスタート](#Quick-Start)
-  * [デバイスの発見と接続](#Quick-Start-1)
-  * [環境系センサーのモニタリング](#Quick-Start-2)
-  * [モーション系センサーのモニタリング](#Quick-Start-3)
-  * [ビーコンの設定とモニタリング](#Quick-Start-4)
-* [`Alps` オブジェクト](#Alps-object)
-  * [init() メソッド](#Alps-init-method)
-  * [discover(*[params]*) メソッド](#Alps-discover-method)
-  * [scartScan(*[params]*) メソッド](#Alps-startScan-method)
-  * [stopScan() メソッド](#Alps-stopScan-method)
-  * [`onadvertisement` イベントハンドラ](#Alps-onadvertisement-event-handler)
-* [`AlpsDevice` オブジェクト](#AlpsDevice-object)
-  * [プロパティ](#AlpsDevice-properties)
-  * [`ondisconnect` イベントハンドラ](#AlpsDevice-ondisconnect-event-handler)
-  * [`onnotify` イベントハンドラ](#AlpsDevice-onnotify-event-handler)
-  * [connect() メソッド](#AlpsDevice-connect-method)
-  * [disconnect() メソッド](#AlpsDevice-disconnect-method)
-  * [setBeaconMode(*params*) メソッド](#AlpsDevice-setBeaconMode-method)
-  * [startMonitor([params]) メソッド](#AlpsDevice-startMonitor-method)
-  * [stopMonitor() メソッド](#AlpsDevice-stopMonitor-method)
-  * [getStatus() メソッド](#AlpsDevice-getStatus-method)
-* [`AlpsAdvertisement` オブジェクト](#AlpsAdvertisement-object)
-  * [Normal Advertising モード](#AlpsAdvertisement-object-Normal)
-  * [Sensor Beacon モード](#AlpsAdvertisement-object-Sensor)
-  * [General Beacon モード](#AlpsAdvertisement-object-General)
-* [リリースノート](#Release-note)
-* [リファレンス](#References)
-* [ライセンス](#License)
+* [Quick Start](#Quick-Start)
+  * [Discovering and connecting to a device](#Quick-Start-1)
+  * [Monitoring the environment sensors](#Quick-Start-2)
+  * [Monitoring the motion sensors](#Quick-Start-3)
+  * [Setting and monitoring the beacons](#Quick-Start-4)
+* [`Alps` object](#Alps-object)
+  * [`init()` method](#Alps-init-method)
+  * [`discover()` method](#Alps-discover-method)
+  * [`scartScan()` method](#Alps-startScan-method)
+  * [`stopScan()` method](#Alps-stopScan-method)
+  * [`onadvertisement` event handler](#Alps-onadvertisement-event-handler)
+* [`AlpsDevice` object](#AlpsDevice-object)
+  * [Properties](#AlpsDevice-properties)
+  * [`ondisconnect` event handler](#AlpsDevice-ondisconnect-event-handler)
+  * [`onnotify` event handler](#AlpsDevice-onnotify-event-handler)
+  * [`connect()` method](#AlpsDevice-connect-method)
+  * [`disconnect()` method](#AlpsDevice-disconnect-method)
+  * [`isConnected()` method](#AlpsDevice-isConnected-method)
+  * [`setBeaconMode()` method](#AlpsDevice-setBeaconMode-method)
+  * [`startMonitor()` method](#AlpsDevice-startMonitor-method)
+  * [`stopMonitor()` method](#AlpsDevice-stopMonitor-method)
+  * [`getStatus()` method](#AlpsDevice-getStatus-method)
+  * [`getDeviceName()` method](#AlpsDevice-getDeviceName-method)
+  * [`setDeviceName()` method](#AlpsDevice-setDeviceName-method)
+* [`AlpsAdvertisement` object](#AlpsAdvertisement-object)
+  * [Normal Advertising mode](#AlpsAdvertisement-object-Normal)
+  * [Sensor Beacon mode](#AlpsAdvertisement-object-Sensor)
+  * [General Beacon mode](#AlpsAdvertisement-object-General)
+* [Release Note](#Release-note)
+* [References](#References)
+* [License](#License)
 
 ---------------------------------------
-## <a id="Quick-Start">クイックスタート</a>
+## <a id="Quick-Start">Quick Start</a>
 
-### <a id="Quick-Start-1">デバイスの発見と接続</a>
+### <a id="Quick-Start-1">Discovering and connecting to a device</a>
 
-このサンプルコードでは、デバイスの発見方法、接続方法、切断方法を示します。
+The sample code below shows how to discover, connect to, and disconnect a device:
 
 ```JavaScript
-// Alps コンストラクタ
+// Alps constructor
 const Alps = require('node-alps');
-// Alps オブジェクトの生成
+// Create an Alps object
 const alps = new Alps();
-// AlpsDevice オブジェクトを格納する変数
+// AlpsDevice object
 let device = null;
 
-// Alps オブジェクトの初期化
+// Initialize an Alps object
 alps.init().then(() => {
-  // デバイスの発見を開始
+  // Start to discover devices
   return alps.discover({
-    duration: 5000, // 最大 5 秒待つ
-    quick: true     // 1 個でもデバイスを見つけたら終了
+    duration: 5000, // Wait for up to 5 seconds
+    quick: true     // Stop the discovering process when a device is found
   });
 }).then((device_list) => {
-  // デバイスを発見できたかを確認
+  // Check if a device was found
   if(device_list.length === 0) {
-    throw new Error('デバイスが見つかりませんでした。');
+    throw new Error('No device was found.');
   }
-  // 発見したデバイスを表す AlpsDevice オブジェクト
+  // AlpsDevice object representing the found device
   device = device_list[0];
-  console.log('デバイスが見つかりました: ' + device.advertisement.localName);
-  // デバイスに接続
-  console.log('接続します...');
+  console.log('A device was found: ' + device.advertisement.localName);
+  // Connect to the device
+  console.log('Connecting...');
   return device.connect();
 }).then(() => {
-  console.log('接続しました。');
+  console.log('Connected.');
   /*--------------------------------------
-  * ここからデバイスに対して操作が可能になります。
+  * Do something with the device.
   * ----------------------------------- */
-  // デバイスを切断
-  console.log('切断します...');
+  // Disconnect the device
+  console.log('Disconnecting...');
   return device.disconnect();
 }).then(() => {
-  console.log('切断しました。');
+  console.log('Disconnected.');
   process.exit();
 }).catch((error) => {
   console.error(error);
   process.exit();
 });
-
 ```
 
-本モジュールを使うためには、まず、`Alps` コンストラクタから [`Alps`](#Alps-object) オブジェクトを生成しなければいけません。上記コードでは、変数 `Alps` が [`Alps`](#Alps-object) オブジェクトに該当します。
+In order to use this module, the [`Alps`](#Alps-object) object has to be created by the `Alps` constructor at first. In the code above, the variable `alps` corresponds to the [`Alps`](#Alps-object) object.
 
-[`Alps`](#Alps-object) オブジェクトは、[`init()`](#Alps-init-method) メソッドを呼び出すことで、利用可能になります。[`Alps`](#Alps-object) オブジェクトに実装されているメソッドは、すべて非同期となり、`Promise` オブジェクトを返します。
+The [`Alps`](#Alps-object) object is activated by calling the [`init()`](#Alps-init-method) method. All methods implemented in the [`Alps`](#Alps-object) object are asynchronous and return the `Promise` object.
 
-デバイスを操作するためには、[`Alps`](#Alps-object) オブジェクトの [`discover()`](#Alps-discover-method) メソッドを使って、デバイスを発見します。このメソッドは 2 つの引数を与えることができます。上記コードでは、発見するための待ちの時間を表す `duration` プロパティに `5000` (5 秒) を指定しています。また、`quick` プロパティに `true` を指定することで、デバイスが 1 個発見された時点で、`duraion` プロパティに指定した待ち時間を待たずに、処理を終了させます。
+The [`discover()`](#Alps-discover-method) method implemented in the [`Alps`](#Alps-object) object discovers nearby devices. The method takes two arguments. In the code above, the `duration` property is set to `5000` (5 seconds), which is the wait time for discovering nearby devices. If the `quick` property is set to `true`, this method finishes the discovery process when a device is found even if the wait time (the `duration` property) remains.
 
-[`discover()`](#Alps-discover-method) メソッドは、デバイスが発見されると、`resolve()` 関数には、発見したデバイスを表す [`AlpsDevice`](#AlpsDevice-object) を格納した配列が与えられます。上記コードでは、発見したデバイスの 1 つを表す [`AlpsDevice`](#AlpsDevice-object) を、変数 `device` にセットしています。
+The [`discover()`](#Alps-discover-method) method calls the `resolve()` function with an `Array` object containing [`AlpsDevice`](#AlpsDevice-object) objects representing the found devices. In the code above, [`AlpsDevice`](#AlpsDevice-object) representing a device found first is assigned to the variable `device`.
 
-この時点ではまだ該当のデバイスを操作することはできません。そのためには、[`connect()`](#AlpsDevice-connect-method) メソッドを使って接続しなければいけません。接続が完了したら、[`AlpsDevice`](#AlpsDevice-object) オブジェクトに実装されたその他のメソッドが利用できるようになります。
+At this point of time, the device is not ready to be controlled yet. To do so, you have to establish a connection with the device using the [`connect()`](#AlpsDevice-connect-method) method. After the device connected successfully, all methods implemented in the [`AlpsDevice`](#AlpsDevice-object) object will be ready to use.
 
-最後に、デバイスを切断するには、[`disconnect()`](#AlpsDevice-disconnect-method) メソッドを使います。
+At last, in order to disconnect the device, use the [`disconnect()`](#AlpsDevice-disconnect-method) method.
 
-上記サンプルコードを実行すると、次のような結果が得られます。
+Executing the sample code above, you can see the result as follows:
 
 ```
-デバイスが見つかりました: SNM00
-接続します...
-接続しました。
-切断します...
-切断しました。
+A device was found: SNM00
+Connecting...
+Connected.
+Disconnecting...
+Disconnected.
 ```
 
-### <a id="Quick-Start-2">環境系センサーのモニタリング</a>
+### <a id="Quick-Start-2">Monitoring the environment sensors</a>
 
-デバイスにはさまざまなセンサーが内蔵されていますが、その計測結果をモニターする際には、2 つのモードがあります。一つは、環境系センサーのモニターモード、もう一つは、モーション系センサーのモニターモードです。ここでは、環境系センサーのモニターモードの使い方について解説します。環境系センサーは、大気圧センサー、湿度センサー、温度センサー、UV センサー、周辺光センサーが該当します。
+Many types of sensors are equipped in the device. The device supports two modes for monitoring the measuring results: the environment sensors mode and the motion sensors mode. This section describes how to use the environment sensors mode. The environment sensors consists of a pressure sensor, a humidity sensor, a temperature sensor, a UV sensor, and an ambient light sensor.
 
-下記サンプルコードでは、環境系センサーのモニターモードでモニタリングを開始し、その結果をコンソールに都度表示します。そして、30 秒後にモニター処理を停止して切断します。
+The sample code below starts to monitor the measuring results in the environment sensors mode, then outputs the results on the console in real time, finally stops to monitor and disconnects the device in 30 seconds.
+
 
 ```JavaScript
 const Alps = require('node-alps');
@@ -141,36 +150,36 @@ alps.init().then(() => {
   });
 }).then((device_list) => {
   if(device_list.length === 0) {
-    throw new Error('デバイスが見つかりませんでした。');
+    throw new Error('No device was found.');
   }
   device = device_list[0];
-  console.log('デバイスが見つかりました: ' + device.advertisement.localName);
-  console.log('接続します...');
+  console.log('A device was found: ' + device.advertisement.localName);
+  console.log('Connecting...');
   return device.connect();
 }).then(() => {
-  console.log('接続しました。');
-  // 環境系センサーのモニター開始処理
-  console.log('環境系センサーのモニターの準備を開始します...');
+  console.log('Connected.');
+  // Prepare to monitor the environment sensors
+  console.log('Preparing to monitor the environment sensors...');
   return device.startMonitor({
-    mode    : 0, // 環境系センサーモニターモード
-    interval: 1  // レポート間隔 (秒)
+    mode    : 0, // environment sensors mode
+    interval: 1  // interval of report (seconds)
   });
 }).then(() => {
-  console.log('モニターの準備ができました。');
-  console.log('モニターを開始します。');
-  // イベントリスナーをセット
+  console.log('Ready to monitor.');
+  console.log('Starting to monitor.');
+  // Set an event listener
   device.onnotify = (data) => {
     console.log(JSON.stringify(data, null, '  '));
   };
 
-  // 30 秒後にモニターを停止して切断
+  // Stop to monitor and disconnect the device in 30 seconds
   setTimeout(() => {
-    // モニター停止処理
+    // Stop to monitor
     device.stopMonitor().then(() => {
-      console.log('モニターを停止しました。')
+      console.log('Stopped to monitor.')
       return device.disconnect();
     }).then(() => {
-      console.log('切断しました。');
+      console.log('Disconnected.');
       process.exit();
     }).catch((error) => {
       console.error(error);
@@ -184,23 +193,23 @@ alps.init().then(() => {
 });
 ```
 
-[`connect()`](#AlpsDevice-connect-method) メソッドでデバイスに接続した後、[`startMonitor()`](#AlpsDevice-startMonitor-method) メソッドを使って、該当のデバイスに対して、センサー計測情報のレポートを要求します。
+In order to monitor the measuring results,  call the [`startMonitor()`](#AlpsDevice-startMonitor-method) method to request the device to report the measuring results after connecting to the device using the [`connect()`](#AlpsDevice-connect-method) method.
 
-[`startMonitor()`](#AlpsDevice-startMonitor-method) メソッドには 2 つのパラメータを指定することができます。パラメータ `mode` はモニター対象となるセンサーグループを表します。環境系センサーの場合は、`0` を指定します。パラメータ `interval` はデバイスからのレポート間隔を表し、単位は秒です。上記コードでは、1 秒間隔でレポートするよう、指定しています。
+The [`startMonitor()`](#AlpsDevice-startMonitor-method) method takes two parameters: The `mode` represents the sensor group to monitor. `0` means the environment sensors. The `interval` represents the interval of report. The unit is seconds. The code above requests 1 second interval reports.
 
-センサー計測情報のレポートの要求が完了したら、そのレポートを受信するためのコールバック関数を [`onnotify`](#AlpsDevice-onnotify-event-handler) イベントハンドラにセットします。レポートを受信するたびに、そのコールバック関数が呼び出され、その関数には計測結果を格納したオブジェクトが引数として与えられます。
+In order to receive the measuring results, assign a callback function to the [`onnotify`](#AlpsDevice-onnotify-event-handler) event handler. Whenever a report is received, the callback function will be called with an object containing the measuring result.
 
-モニターを停止するためには、[`stopMonitor()`](#AlpsDevice-stopMonitor-method) メソッドを呼び出します。
+In order to stop to monitor, call the [`stopMonitor()`](#AlpsDevice-stopMonitor-method) method.
 
-上記コードを実装すると、次のような結果がコンソールに出力されます。
+The code above will outputs the results on the console as follows:
 
 ```
-デバイスが見つかりました: SNM00
-接続します...
-接続しました。
-環境系センサーのモニターの準備を開始します...
-モニターの準備ができました。
-モニターを開始します。
+A device was found: SNM00
+Connecting...
+Connected.
+Preparing to monitor the environment sensors...
+Ready to monitor.
+Starting to monitor.
 {
   "pressure": 997.0392919813839,
   "humidity": 52.734375,
@@ -223,26 +232,26 @@ alps.init().then(() => {
 
 ...
 
-モニターを停止しました。
-切断しました。
+Stopped to monitor.
+Disconnected.
 ```
 
-### <a id="Quick-Start-3">モーション系センサーのモニタリング</a>
+### <a id="Quick-Start-3">Monitoring the motion sensors</a>
 
-デバイスにはさまざまなセンサーが内蔵されていますが、その計測結果をモニターする際には、2 つのモードがあります。一つは、環境系センサーのモニターモード、もう一つは、モーション系センサーのモニターモードです。ここでは、モーション系センサーのモニターモードの使い方について解説します。モーション系センサーは、加速度センサー、地磁気センサーが該当します。
+Many types of sensors are equipped in the device. The device supports two modes for monitoring the measuring results: the environment sensors mode and the motion sensors mode. This section describes how to use the motion sensors mode. The motion sensors consists of an accelerometer sensor and a geo-magnetic sensor.
 
-前述の環境系センサーのモニターのコードの [`startMonitor()`](#AlpsDevice-startMonitor-method) メソッドに与えるパラメータを変えるだけで、モーション系センサーをモニターすることができます。
+In order to monitor the motion sensors, change the parameters passed to the [`startMonitor()`](#AlpsDevice-startMonitor-method) method in the sample code described in the previous section.
 
 ```JavaScript
 return device.startMonitor({
-  mode    : 1,   // モーション系センサーモニターモード
-  interval: 100  // レポート間隔 (秒)
+  mode    : 1,   // motion sensor mode
+  interval: 100  // interval of report (millisecond)
 });
 ```
 
-パラメータ `mode` はモニター対象となるセンサーグループを表します。モーション系センサーの場合は、`1` を指定します。パラメータ `interval` はデバイスからのレポート間隔を表し、単位は**ミリ秒**です。環境系センサーモニターモードでは、その単位は秒でしたが、モーション系センサーモニターモードではミリ秒になりますので、注意してください。上記コードでは、100 ミリ秒間隔でレポートするよう、指定しています。
+The `mode` represents the sensor group to monitor. `1` means the motion sensors. The `interval` represents the interval of report. The unit is **millisecond** in this mode. Note that the unit of the `interval` in the environment sensors mode is second, on the other hand, the unit in the motion sensors mode is millisecond. The code above requests 100 millisecond interval report.
 
-上記コードを実装すると、次のような結果が連続してコンソールに出力されます。
+The code above will outputs the results on the console as follows:
 
 ```
 {
@@ -266,9 +275,10 @@ return device.startMonitor({
 }
 ```
 
-### <a id="Quick-Start-4">ビーコンの設定とモニタリング</a>
+### <a id="Quick-Start-4">Setting and monitoring the beacons</a>
 
-ビーコンには、"Normal Advertising"、"Sensor Beacon"、"General Beacon" という 3 つのモードがあり、本モジュールは、すべてのモードへの変更および受信をサポートしています。以下のサンプルでは、デバイスに接続後、ビーコンモードを "Sensor Beacon" モードに変更し、切断してから、ビーコンをモニターします。
+The device has three type of beacon modes: "Normal Advertising", "Sensor Beacon", and "General Beacon". This module supports all beacon modes. The sample code below connects to the device, then changes the beacon mode to "Sensor Beacon", finally disconnects the device. Then it monitors the beacons.
+
 
 ```JavaScript
 const Alps = require('node-alps');
@@ -282,37 +292,37 @@ alps.init().then(() => {
   });
 }).then((device_list) => {
   if(device_list.length === 0) {
-    throw new Error('デバイスが見つかりませんでした。');
+    throw new Error('No device was found.');
   }
   device = device_list[0];
-  console.log('デバイスが見つかりました: ' + device.advertisement.localName);
-  console.log('接続します...');
+  console.log('A device was found: ' + device.advertisement.localName);
+  console.log('Connecting...');
   return device.connect();
 }).then(() => {
-  console.log('接続しました。');
-  // センサービーコンモードに変更
-  console.log('ビーコンモードを設定中...');
+  console.log('Connected.');
+  // Change the beacon mode to "Sensor Beacon"
+  console.log('Setting the beacon mode...');
   return device.setBeaconMode({
-    mode  : 1, // センサービーコンモード
-    format: 0  // 0: 環境系センサー, 1: モーション系センサー
+    mode  : 1, // Sensor Beacon mode
+    format: 0  // 0: Environment sensors, 1: Motion sensors
   });
 }).then((data) => {
-  console.log('ビーコンモードを設定しました。');
-  // 切断
+  console.log('Set the beacon mode.');
+  // Disconnect
   return device.disconnect();
 }).then(() => {
-  console.log('切断しました。');
+  console.log('Disconnected.');
 
-  // ビーコンのモニターを開始
-  console.log('ビーコンのモニターを開始します。');
+  // Start to monitor beacons
+  console.log('Starting to monitor beacons.');
   alps.startScan();
 
-  // ビーコン受信用のコールバック関数をセット
+  // Assign a callback function for receiving beacons
   alps.onadvertisement = (ad) => {
     console.log(JSON.stringify(ad, null, '  '));
   };
 
-  // 10 秒後にビーコンのモニターを停止
+  // Stop to monitor beacons in 10 seconds
   setTimeout(() => {
     alps.stopScan();
     process.exit();
@@ -324,13 +334,13 @@ alps.init().then(() => {
 });
 ```
 
-ビーコンモードを変更するには、[`setBeaconMode()`](#AlpsDevice-setBeaconMode-method) メソッドを使います。パラメータ `mode` に 1 をセットすると、"Sensor Beacon" モードになります。"Sensor Beacon" モードには 2 つのフォーマットがあります。一つは主に環境センサー計測値がセットされるフォーマットで、もう一つは、主にモーション系センサー計測値がセットされるフォーマットです。上記コードでは、環境系センサーの計測値がセットされるフォーマットを指定しています。
+In order to change the beacon mode, use the [`setBeaconMode()`](#AlpsDevice-setBeaconMode-method) method. If you want to change the beacon mode to "Sensor Beacon", set the parameter `mode` to `1`. The "Sensor Beacon" mode has two format: the environment sensors format and the motion sensors format. The code above specifies the environment sensors format.
 
-ビーコンをキャッチするためには、事前にデバイスとの接続を切断する必要があります。切断後に、[`startScan()`](#Alps-startScan-method) メソッドを使って、ビーコンのモニターを開始することができます。ビーコンのデータを取得するためには、[`onnotify`](#AlpsDevice-onnotify-event-handler) イベントハンドラにコールバック関数をセットします。ビーコンを受信するたびに、このコールバック関数が呼び出されます。その際に、ビーコンのデータを格納したオブジェクトが引数に与えられます。
+In order to enable the beacons, you have to disconnect the device in advance. You can start to monitor the beacon using the [`startScan()`](#Alps-startScan-method) method after the device is disconnected. In order to receive the beacons, assign a callback function to the [`onnotify`](#AlpsDevice-onnotify-event-handler) event handler. Whenever a beacon is received, the function will be called with an object representing the beacon data.
 
-最後に、ビーコンのモニターを停止するには、[`stopScan()`](#Alps-stopScan-method) メソッドを使います。なお、[`startScan()`](#Alps-startScan-method) メソッドと [`stopScan()`](#Alps-stopScan-method) メソッドは、いずれも非同期処理ではないため、他のメソッドとは異なり、`Promise` オブジェクトを返しません。
+Lastly, in order to stop to monitor, use the [`stopScan()`](#Alps-stopScan-method) method. Note that the [`startScan()`](#Alps-startScan-method) and the [`stopScan()`](#Alps-stopScan-method) methods are not asynchronous. Therefore, these methods do not return a `Promise` object unlike other methods.
 
-上記コードを実行すると、次のような結果がビーコン受信の都度コンソールに表示されます。
+The code above outputs the results on the console whenever a beacon is received.
 
 ```
 {
@@ -354,62 +364,67 @@ alps.init().then(() => {
 ```
 
 ---------------------------------------
-## <a id="Alps-object">`Alps` オブジェクト</a>
+## <a id="Alps-object">`Alps` object</a>
 
-node-alps を利用するためには、まず、次のように node-alps モジュールをロードします。
+In order to use the node-alps, load the node-alps at first as follows:
 
 ```JavaScript
 const Alps = require('node-alps');
 ```
 
-上記コードから `ALps` コンストラクタが得られます。この `Alps` コンストラクタから、次のように、 `Alps` オブジェクトを生成します。
+You can obtain the `Alps` constructor form the code above. Then create an `Alps` object from the `Alps` constructor as follows:
 
 ```JavaScript
 const alps = new Alps();
 ```
 
-`Alps` コンストラクタは、オプションで引数を受け取ります。もし引数を与える場合は、以下のプロパティを持ったハッシュオブジェクトでなければいけません。
+The `Alps` constructor takes an argument optionally. It must be a hash object containing the properties as follows:
 
-プロパティ | 型    | 必須 | 説明
-:--------|:-------|:-----|:-----------
-`noble`  | Noble  | 任意 | [`noble`](https://www.npmjs.com/package/noble) モジュールの `Noble` オブジェクト
+Property | Type   | Required | Description
+:--------|:-------|:---------|:-----------
+`noble`  | Noble  | Optional | a `Noble` object of the [`noble`](https://www.npmjs.com/package/noble) module
 
-node-alps モジュールは、BLE でデバイスと通信を行うために、[`noble`](https://www.npmjs.com/package/noble) モジュールを使います。もし、noble モジュールを使って他の BLE デバイスに接続するのであれば、自身で `Noble` オブジェクトを生成し、このモジュールに引き渡すことができます。もし `Noble` オブジェクトが引き渡さなければ、node-alps モジュールは、自動的に `Noble` オブジェクトを生成します。
+The node-alps module uses the [`noble`](https://www.npmjs.com/package/noble) module in order to interact with the device(s) on BLE. If you want to interact other BLE devices using the noble module, you can create a `Noble` object by yourself, then pass it to this module. If you don't specify a `Noble` object to the `noble` property, this module automatically create a `Noble` object internally.
 
-次のコードは、`Alps` コンストラクターに `Noble` オブジェクトを引き渡す方法を示しています。
+The sample code below shows how to pass a `Nobel` object to the `Alps` constructor.
 
 ```JavaScript
+// Create a Noble object
 const noble = require('noble');
+
+// Create an Alps object
 const Alps = require('node-alps');
 const alps = new Alps({'noble': noble});
 ```
 
-### <a id="Alps-init-method">init() メソッド</a>
+In the code snippet above, the variable `alps` is an `Alps` object. The `Alps` object has a lot of methods as described in sections below.
 
-A `Alps` オブジェクトは生成した時点ではまだ利用することができません。利用前に、`init()` メソッドを使って初期化しなければいけません。
+### <a id="Alps-init-method">init() method</a>
+
+An `Alps` object is not ready to use initially. It has to be initialized using the `init()` method as below:
 
 ```JavaScript
 alps.init().then(() => {
-  // ここから Alps オブジェクトに実装されたメソッドを使うことができます。
+  // You can call methods implemented in the `Alps` object
 }).catch((error) => {
   console.error(error);
 });
 ```
 
-`init()` メソッドは `Promise` オブジェクトを返します。`Alps` オブジェクトの初期化が成功したら、以降で説明する各種メソッドを呼び出すことが可能となります。
+The `init()` method returns a `Promise` object. Once the `Alps` object is initialized successfully, you can call methods as described in the sections below.
 
-### <a id="Alps-discover-method">discover(*[params]*) メソッド</a>
+### <a id="Alps-discover-method">discover(*[params]*) method</a>
 
-`discover()` メソッドは、[アルプス電気社センサネットワークモジュール](http://www.alps.com/j/iotsmart-network/index.html)を発見します。このメソッドは `Promise` オブジェクトを返します。このメソッドには次のパラメーターを格納したハッシュオブジェクトを引き渡すことができます。
+The `discover()` method finds nearby [ALPS Sensor Network Module Evaluation Kit](https://www.alps.com/e/iotsmart-network/)s. This method returns a `Promise` object. This method takes an argument which is a hash object containing parameters as follows:
 
-プロパティ    | 型      | 必須 | 説明
-:------------|:--------|:-----|:------------
-`duration`   | Number  | 任意 | 発見処理の待ち時間をミリ秒で指定します。デフォルト値は 5000 (5 秒) です。
-`quick`      | Boolean | 任意 | `true` を指定したら、最初にデバイスを発見した時点で、発見処理を終了し、`duration` の値に関わらず、`resolve()` 関数が呼び出されます。デフォルト値は `false` です。
-`idFilter`   | String | 任意 | ここに指定した値が、デバイスの ID (`id`) に前方一致するもののみを発見の対象とし、それ以外は無視します。
-`name`       | String | 任意 | デバイスのローカル名を指定します。アドバタイズパケットのローカル名と完全一致したものが発見対象となります。デフォルト値は `SNM00` です。本モジュールにはローカル名を変更する API は用意されていませんが、もし別のツールを使ってローカル名を変更すると、そのデバイスを発見できません。その場合に、このパラメータに変更後のローカル名を指定することで、デバイスを発見できるようにします。
+Property     | Type    | Required | Description
+:------------|:--------|:---------|:------------
+`duration`   | Integer | Optional | Duration for discovery process (msec). The default value is 5000 (5 seconds).
+`quick`      | Boolean | Optional | If this value is set to `true`, this method finishes the discovery process when the first device is found, then calls the `resolve()` function even if the waiting time specified to the `duration` remains. The default value is `false`.
+`idFilter`   | String  | Optional | If this value is set, the device whose ID (`id`) does not start with the specified keyword will be ignored.
+`name`       | String  | Optional | If this value is set, the device whose name does not exactly match the specified value will be ignored. The default value is `"SNM00"`. If you changed the device (local) name, you could not discover your device. That is because this module distinguishes the device by the device name `"SNM00"` by default. If you changed the device name, set the parameter `name` to the changed name.
 
-以下のサンプルでは、the `duration` を `discover()` メソッドに引き渡して、発見処理を 10 秒にしています。
+The sample code below set the parameter `duration` to `10000` (10 seconds) and passes it to the `discover()` method.
 
 ```JavaScript
 alps.init().then(() => {
@@ -423,7 +438,7 @@ alps.init().then(() => {
 });
 ```
 
-`discover()` メソッドは、発見処理を終えると、発見したデバイスを表す [`AlpsDevice`](#AlpsDevice-object) オブジェクトを格納した `Array` オブジェクトを `resolve()` 関数に引き渡します。もし、1 つ発見したらすぐに発見処理を終了して結果を得たいなら、`quick` プロパティに `true` をセットします。
+When the `discover()` method finishes the discovery process, it passes an `Array` object to the `resolve()` function. The `Array` object contains [`AlpsDevice`](#AlpsDevice-object) objects representing the found devices. If you want to discover just one device quickly, set the `quick` property to `true`.
 
 ```JavaScript
 alps.init().then(() => {
@@ -437,36 +452,36 @@ alps.init().then(() => {
   console.error(error);
 });
 ```
-### <a id="Alps-startScan-method">scartScan(*[params]*) メソッド</a>
+### <a id="Alps-startScan-method">scartScan(*[params]*) method</a>
 
-`startScan()` メソッドは、デバイスから送出されるアドバタイズパケットのスキャンを開始します。このメソッドは、次のプロパティを持つハッシュオブジェクトを引数に取ります。
+The `startScan()` method starts to scan advertising packets from devices. This method takes an argument which is a hash object containing the parameters as follows:
 
-プロパティ    | 型     | 必須 | 説明
-:------------|:-------|:-----|:------------
-`idFilter`   | String | 任意 | ここに指定した値が、デバイスの ID (`id`) に前方一致するもののみを発見の対象とし、それ以外は無視します。。
-`name`       | String | 任意 | デバイスのローカル名を指定します。アドバタイズパケットのローカル名と完全一致したものが発見対象となります。デフォルト値は `SNM00` です。本モジュールにはローカル名を変更する API は用意されていませんが、もし別のツールを使ってローカル名を変更すると、そのデバイスを発見できません。その場合に、このパラメータに変更後のローカル名を指定することで、デバイスを発見できるようにします。
+Property     | Type   | Required | Description
+:------------|:-------|:---------|:------------
+`idFilter`   | String | Optional | If this value is set, advertising packets from the devices whose ID (`id`) does not start with the specified keyword will be ignored.
+`name`       | String | Optional | If this value is set, the device whose name does not exactly match the specified value will be ignored. The default value is `"SNM00"`. This module does not support any method to change the device name of the device. If you changed the device name using other tools, you could not discover your device. That is because this module distinguishes the device by the device name `"SNM00"` by default. If you changed the device name, set the parameter `name` to the changed name.
 
-パケットを受信する都度、[`onadvertisement`](#Alps-onadvertisement-event-handler) イベントハンドラにセットしたコールバック関数が呼び出されます。このコールバック関数には、[`AlpsAdvertisement`](#AlpsAdvertisement-object) オブジェクトが引き渡されます。
+Whenever a packet is received, the callback function assigned to the [`onadvertisement`](#Alps-onadvertisement-event-handler) event handler will be called. An [`AlpsAdvertisement`](#AlpsAdvertisement-object) will be passed to the callback function.
 
 ```JavaScript
-// アドバタイズパケット受信のコールバック関数をセット
+// Assign a callback function for receiving advertising packets
 alps.onadvertisement = (ad) => {
   console.log(JSON.stringify(ad, null, '  '));
 };
 
-// スキャン開始
+// Start to scan
 alps.startScan();
 
-// 60 秒後にスキャン停止
+// Stop to scan in 60 seconds
 setTimeout(() => {
   alps.stopScan();
   process.exit();
 }, 60000);
 ```
 
-スキャンの停止には、[`stopScan()`](#Alps-stopScan-method) メソッドを使います。なお、`startScan()` および `stopScan()` メソッドはいずれも非同期処理ではないため、他のメソッドとは異なり、`Promise` オブジェクトは返しません。
+In order to stop to scan, use the [`stopScan()`](#Alps-stopScan-method) method. Note that the [`startScan()`](#Alps-startScan-method) and the [`stopScan()`](#Alps-stopScan-method) methods are not asynchronous. Therefore, these methods do not return a `Promise` object unlike other methods.
 
-デバイスの電源を入れた直後で何も設定を変更していなければ、次のようなビーコンデータが連続して得られます。
+If you did not change any configurations of the device after turning it on, you would obtain beacon data as follows:
 
 ```
 {
@@ -478,76 +493,72 @@ setTimeout(() => {
 }
 ```
 
-ビーコンのデータは、ビーコンモードによって異なります。詳細は [`setBeaconMode()`](#AlpsDevice-setBeaconMode-method) メソッド、および、[`AlpsAdvertisement`](#AlpsAdvertisement-object) オブジェクトを参照してください。
+The beacon data is different depending on the beacon mode. See the section "[`setBeaconMode()` method](#AlpsDevice-setBeaconMode-method)" and "[`AlpsAdvertisement` object](#AlpsAdvertisement-object)" for details.
 
-### <a id="Alps-stopScan-method">stopScan() メソッド</a>
+### <a id="Alps-stopScan-method">stopScan() method</a>
 
-`stopScan()` メソッドは、デバイスから送出されるアドバタイズパケットのスキャンを停止します。詳細は [`startScan()`](#Alps-startScan-method) メソッドを参照してください。
+The `stopScan()` method stops to scan advertising packets from devices. See the section "[`startScan()` method](#Alps-startScan-method)" for details.
 
-### <a id="Alps-onadvertisement-event-handler">`onadvertisement` イベントハンドラ</a>
+### <a id="Alps-onadvertisement-event-handler">`onadvertisement` event handler</a>
 
-`onadvertisement` プロパティにコールバック関数をセットすると、アドバタイズパケットのスキャンがアクティブな間 ([`startScan()`](#Alps-startScan-method) メソッドが呼び出されてから [`stopScan()`](#Alps-stopScan-method) メソッドが呼び出されるまで)、アドバタイズパケットを受信する都度、そのコールバック関数が呼び出されます。
+If a callback function is set to the `onadvertisement` property, the callback function will be called whenever an advertising packet is received from a device during the scan is active (from the moment when the [`startScan()`](#Alps-startScan-method) method is called, to the moment when the [`stopScan()`](#Alps-stopScan-method) method is called).
 
-詳細は [`startScan()`](#Alps-startScan-method) メソッドを参照してください。
+See the section "[`startScan()` method](#Alps-startScan-method)" for details.
 
 ---------------------------------------
-## <a id="AlpsDevice-object">`AlpsDevice` オブジェクト</a>
+## <a id="AlpsDevice-object">`AlpsDevice` object</a>
 
-`AlpsDevice` オブジェクトは、[`Alps`](#Alps-object) の [`discover()`](#Alps-discover-method) メソッドを呼び出すことによって発見されたデバイスを表します。
+The `AlpsDevice` object represents an [ALPS Sensor Network Module Evaluation Kit](https://www.alps.com/e/iotsmart-network/), which is created through the discovery process triggered by the [`Alps.discover()`](#Alps-discover-method) method. This section describes the properties and methods implemented in this object.
 
-### <a id="AlpsDevice-properties">プロパティ</a>
+### <a id="AlpsDevice-properties">Properties</a>
 
-`AlpsDevice` オブジェクトには、以下のプロパティが実装されています。
+The `AlpsDevice` object supports the properties as follows:
 
-プロパティ        | 型     | 説明 
+Property        | Type     | Description
 :---------------|:---------|-----------------------------
-`advertisement` | [`AlpsAdvertisement`](#AlpsAdvertisement-object) | このオブジェクトは、デバイスが発見されたときに受信したアドバタイズパケットを表します。詳細は、 [`AlpsAdvertisement`](#AlpsAdvertisement-object) オブジェクトを参照してください。
-`connected`     | Boolean  | デバイスが接続しているとき、この値は `true` になり、そうでなければ、`false` になります。
-[`ondisconnect`](#AlpsDevice-ondisconnect-event-handler) | Function | このプロパティにセットされた関数は、デバイスが切断されたときに呼び出されます。詳細は、[`ondisconnect`](#AlpsDevice-ondisconnect-event-handler) イベントハンドラを参照してください。
-[`onnotify`](#AlpsDevice-onnotify-event-handler) | Function | このプロパティにセットされた関数は、センサー情報を受信した都度に呼び出されます。詳細は、[`onnotify`](#AlpsDevice-onnotify-event-handler) イベントハンドラを参照してください。
+`advertisement` | [`AlpsAdvertisement`](#AlpsAdvertisement-object) | This object represents the advertising packet which was received when the device was discovered. See the section "[`AlpsAdvertisement` object](#AlpsAdvertisement-object)" for details. 
+`connected` (*DEPRECATED*)     | Boolean  | If the device is connected, this value is `true`. Otherwise, this value is `false`. *Note that this property is **DEPRECATED**. It is strongly recommended to use the [`isConnected()`](#AlpsDevice-isConnected-method) method to know the connectivity.*
+[`ondisconnect`](#AlpsDevice-ondisconnect-event-handler) | Function | When the device is disconnected, this event handler will be called. See the section "[`ondisconnect` event handler](#AlpsDevice-ondisconnect-event-handler)" for details.
+[`onnotify`](#AlpsDevice-onnotify-event-handler) | Function | Whenever a packet containing sensing data is received from the device, this event handler will callled. See the section "[`onnotify` event handler](#AlpsDevice-onnotify-event-handler)" for details. 
 
-### <a id="AlpsDevice-ondisconnect-event-handler">`ondisconnect` イベントハンドラ</a>
+### <a id="AlpsDevice-ondisconnect-event-handler">`ondisconnect` event handler</a>
 
-`ondisconnect` は、デバイスが切断されたときに呼び出されるイベントハンドラです。
+The `ondisconnect` event handler will be called when the connection with the device is disconnected. When this event handler is called, a hash object which contains the properties as follows is passed to this event handler:
+
+Property   | Type    | Description
+:----------|:--------|:-----------
+`wasClean` | Boolean | If the connection was closed intentionally, that is, if the connection was closed because the [`disconnect()`](#EnvsensorDevice-disconnect-method) method was called, this value is `true`. Otherwise, this value is `false`.
 
 ```JavaScript
 device.ondisconnect = (reason) => {
-  console.log('切断されました。');
-  console.dir(reason);
+  if(reason.wasClean === true) {
+    console.log('The connection was closed intentionally.');
+  } else {
+    console.log('The connection was closed unexpectedly.')
+  }
 };
 ```
 
-デバイスとの接続が切断されると、次のような結果を表示します。
+### <a id="AlpsDevice-onnotify-event-handler">`onnotify` event handler</a>
 
-```
-Disconnected.
-{ wasClean: false }
-```
+The `onnotify` is an event handler which is called whenever a notification from device is received after the [`startMonitor()`](#AlpsDevice-startMonitor-method) method is called. See the section "[`startMonitor()` method](#AlpsDevice-startMonitor-method)" for details.
 
-`ondisconnect` にセットされたコールバック関数には、切断理由を表すプロパティ `wasClean` を含んだオブジェクトが引き渡されます。`wasClean` プロパティの値が `ture` の場合は、[`disconnect()`](#AlpsDevice-disconnect-method) メソッドによって切断されたことを表します。もし `false` の場合は、意図せぬ切断を表します。
+### <a id="AlpsDevice-connect-method">connect() method</a>
 
-環境によっては、`ondisconnect` は意図せぬ切断の場合のみにしか呼び出されませんので注意してください。つまり、このコールバック関数が呼び出されたとき、`wasClean` は常に `false` であり、それは意図せぬ切断を意味していることになります。したがって、`disconnect()` メソッドの呼び出しによる切断のトリガーとして `ondisconnect` イベントハンドラを使うことは推奨されません。また、実際に `ondisconnect` イベントハンドラを使う際には、念のために、`wasClean` の値が `false` であることを確認することを推奨します。
+The `connect()` method establishes a connection with the device (i.e., pairing). This method returns a `Promise` object.
 
-### <a id="AlpsDevice-onnotify-event-handler">`onnotify` イベントハンドラ</a>
-
-`onnotify` は、[`startMonitor()`](#AlpsDevice-startMonitor-method) メソッドによってセンサー情報のモニターが開始された後、デバイスから送られてくるセンサー情報の通知を受け取るためのイベントハンドラです。詳細は、[`startMonitor()`](#AlpsDevice-startMonitor-method) メソッドを参照してください。
-
-### <a id="AlpsDevice-connect-method">connect() メソッド</a>
-
-`connect()` メソッドは、デバイスとのコネクションを確立します (ペアリング)。このメソッドは `Promise` オブジェクトを返します。
-
-以下のサンプルコードは、デバイスとのコネクションを確立してから、最後にコネクションを切断します。
+The code snippet below establishes a connection with a device, then it disconnects the device:
 
 ```JavaScript
 device.connect().then(() => {
-  console.log('接続しました。');
+  console.log('Connected');
   /*--------------------------------------
-  * ここからデバイスに対して操作が可能になります。
+  * Do something
   * ----------------------------------- */
-  // デバイスを切断
+  // Disconnect the device
   return device.disconnect();
 }).then(() => {
-  console.log('切断しました。');
+  console.log('Disconnected.');
   process.exit();
 }).catch((error) => {
   console.error(error);
@@ -555,74 +566,84 @@ device.connect().then(() => {
 });
 ```
 
-### <a id="AlpsDevice-disconnect-method">disconnect() メソッド</a>
+### <a id="AlpsDevice-disconnect-method">disconnect() method</a>
 
-`disconnect()` メソッドは、デバイスとの接続を切断します。このメソッドは `Promise` オブジェクトを返します。詳細は [`connect()`](#AlpsDevice-connect-method) メソッドを参照してください。
+The `disconnect()` method closes a connection with the device. This method returns a `Promise` object. See the section "[`connect()` method](#AlpsDevice-connect-method)" for details.
 
-なお、デバイスに対する操作が終わったら、必ず `disconnect()` メソッドを使ってコネクションを切断してください。もしコネクションを切断せずにスクリプトが終了してしまうと、しばらくの間、そのデバイスに接続できなくなる可能性がありますので注意してください。もし接続に失敗するようであれば、デバイスの電源を OFF にしてから、再度、ON にしてみてください。
+Be sure to close a connection using the `disconnect()` method when all tasks with the device were finished. If your script was terminated without closing a conection using this method, you possibly could not reconnect the device for a while. If you encountered the problem, power off and on the device.
 
-### <a id="AlpsDevice-setBeaconMode-method">setBeaconMode(*params*) メソッド</a>
+### <a id="AlpsDevice-isConnected-method">isConnected() method</a>
 
-`setBeaconMode()` メソッドは、デバイスが発するビーコン (アドバタイズパケット) のモードを切り替えます。以下のサンプルコードは、ビーコンモードを Sensor Beacon モードに切り替えます。
+The `isConnected()` method returns whether the device is connected or not. If the device is connected, this method returns `true`. Otherwise, it returns `false`.
 
-このメソッドの具体的なコードの書き方は、クイックスタートの「[ビーコンの設定とモニタリング](#Quick-Start-4)」を参照してください。
+```javascript
+if(device.isConnected()) {
+  console.log('Connected.');
+} else {
+  console.log('Not connected.');
+}
+```
 
-このメソッドには、設定パラメータを持ったハッシュオブジェクトを引数に与えますが、切り替えたいモードによって、以下の通り、パラメータが異なります。
+### <a id="AlpsDevice-setBeaconMode-method">setBeaconMode(*params*) method</a>
 
-各モードでデバイスから送信されるビーコンデータの詳細は、[`AlpsAdvertisement`](#AlpsAdvertisement-object) オブジェクトを参照してください。
+The `setBeaconMode()` method changes the beacon mode of advertising packet from the device. See the section "[Setting and monitoring the beacons](#Quick-Start-4)" in the [Quick Start](#Quick-Start) for details on how to code.
 
-#### Normal Advertising モード
+This method takes an argument which is a hash object including parameters. The parameters are different depends on the beacon mode as described in the sections below.
 
-Normal Advertising モードは、アドバタイズパケットに Manufacturer Specific Data を持たないモードです。これは、デバイスの電源を入れた際のデフォルトのモードです。
+See the section "[`AlpsAdvertisement` object](#AlpsAdvertisement-object)" for details on beacon data format in each mode from the device.
 
-プロパティ    | 型     | 必須 | 説明
-:------------|:-------|:-----|:------------
-`mode`       | Number | 必須 | `0` 固定
-`interval`   | Number | 任意 | アドバタイズパケットの送出間隔をミリ秒で指定します。指定可能な値の範囲は 30 ～ 10000 です。指定がなければ、100 (ミリ秒) がセットされます。
+#### Normal Advertising mode
 
-#### Sensor Beacon モード
+The Normal Advertising mode is a mode which does not contain any Manufacturer Specific Data in an advertising packet. This mode is default when the device is powered on.
 
-Sensor Beacon モードは、ビーコンデータにデバイスのセンサーの計測値を含んだモードです。
+Property     | Type    | Required | Description
+:------------|:--------|:---------|:------------
+`mode`       | Integer | Required | `0` (means the "Normal Advertising mode")
+`interval`   | Integer | Optional | Advertising Interval in millisecond. It must be an integer in the range of `30` to `10000`. If this parameter is not specified, it is assumed that this property is set to `100` (millisecond).
 
-プロパティ    | 型     | 必須 | 説明
-:------------|:-------|:-----|:------------
-`mode`       | Number | 必須 | `1` 固定
-`interval`   | Number | 任意 | アドバタイズパケットの送出間隔をミリ秒で指定します。指定可能な値の範囲は 30 ～ 10000 です。指定がなければ、100 (ミリ秒) がセットされます。
-`format`     | Number | 任意 | パケットのフォーマットを指定します。`0` は環境系センサー情報フォーマット、`1` はモーション系センサー情報フォーマットを意味します。
-`accelerationRange` | Number | 任意 |  加速度センサーの計測範囲を指定します。指定可能な値は `2`, `4`, `8`, `12`, `16` です。たとえば、`2` を指定すると、±2G の範囲で計測します。指定がなければ `2` がセットされます。
+#### Sensor Beacon mode
 
-#### General Beacon モード
+The Sensor Beacon mode is a mode which contains measurement data of the sensors in an advertising packet.
 
-General Beacon モードは iBeacon 相当のビーコンを発するモードです。
+Property     | Type    | Required | Description
+:------------|:--------|:---------|:------------
+`mode`       | Integer | Required | `1` (means the "Sensor Beacon mode")
+`interval`   | Integer | Optional | Advertising Interval in millisecond. It must be an integer in the range of `30` to `10000`. If this parameter is not specified, it is assumed that the value is set to `100` (millisecond).
+`format`     | Integer | Optional | Packet data format. `0`: [Environment sensors format](#Environment-sensors-format), `1`: [Motion sensors format](#Motion-sensors-format).
+`accelerationRange` | Integer | Optional | Acceleration Sensor Range. The value must be `2`, `4`, `8`, `12`, or `16`. For example, if this parameter is set to `2`, the acceleration sensor measures in the range of -2G to +2G. If this parameter is not specified, it is assumed that the value is set to `2`.
 
-プロパティ    | 型     | 必須 | 説明
-:------------|:-------|:-----|:------------
-`mode`       | Number | 必須 | `2` 固定
-`uuid`       | String | 任意 | UUID を指定します。指定がなければ `00000000-0000-0000-0000000000000000` がセットされます。
-`major`      | Number | 任意 | Major 番号を指定します。指定可能な値は 0 ～ 65535 です。指定がなければ 0 がセットされます。
-`manor`      | Number | 任意 | Minor 番号を指定します。指定可能な値は 0 ～ 65535 です。指定がなければ 0 がセットされます。
+#### General Beacon mode
 
-### <a id="AlpsDevice-startMonitor-method">startMonitor(*[params]*) メソッド</a>
+The General Beacon mode is a mode which contains iBeacon compatible data in an advertising packet.
 
-`startMonitor()` メソッドは、デバイスのセンサー情報のモニターを開始します。このメソッドは `Promise` オブジェクトを返します。
+Property     | Type    | Required | Description
+:------------|:--------|:---------|:------------
+`mode`       | Integer | Required | `2` (means the "General Beacon mode")
+`uuid`       | String | Optional | UUID of iBeacon. If this parameter is not specified, it is assumed that the value is set to `00000000-0000-0000-0000000000000000`.
+`major`      | Integer | Optional | Major of iBeacon. The value must be in the range of `0` to `65535`. If this parameter is not specified, it is assumed that the value is set to `0`.
+`manor`      | Integer | Optional | Minor of iBeacon. The value must be in the range of `0` to `65535`. If this parameter is not specified, it is assumed that the value is set to `0`.
 
-センサー情報のモニターは、2 つのモードがあります。一つは環境系センサーモードです。このモードでは、大気圧センサー、湿度センサー、温度センサー、UV センサー、照度センサーの計測値をモニターします。もひとつのモードはモーション系センサーモードです。このモードでは、地磁気センサーと加速度センサーの計測値をモニターします。
+### <a id="AlpsDevice-startMonitor-method">startMonitor(*[params]*) method</a>
 
-これらのモードでは、計測するセンサーの種類が違うことに加え、計測間隔も異なります。環境系センサーモードでは秒単位で間隔を指定するのに対し、モーション系ではミリ秒単位で間隔を指定します。
+The `startMonitor()` method starts to monitor sensing data of the device. This method returns a `Promise` object.
 
-このメソッドには、パラメータ値を持ったハッシュオブジェクトを引数に与えますが、モードによって、このメソッドに与えるパラメーターが異なります。また、デバイスからのセンサー計測結果通知を受信すると、[`onnotify`](#AlpsDevice-onnotify-event-handler) イベントハンドラにセットされたコールバック関数が非同期に呼び出され、計測結果のデータが引き渡されますが、そのデータもモードによって異なります。
+There are two types of monitoring mode: Environment sensors mode and Motion sensors mode. The Environment sensors mode monitors measurement data measured by the pressure sensor, the humidity sensor, the temperature sensor, the UV sensor, and the ambient light sensor, while the Motion sensors mode monitors measurement data measured by the geo-magnetic sensor and the accelerometer sensor.
 
-#### 環境系センサーモードのパラメータ
+Not only the types of sensors but also the measurement interval are different depending on the mode. In the environment sensors mode, you can set the measurement interval in second. On the other hand, in the motion sensors mode, you can set it in millisecond.
 
-プロパティ    | 型     | 必須 | 説明
-:------------|:-------|:-----|:------------
-`mode`       | Number | 必須 | `0` 固定
-`interval`   | Number | 任意 | 計測結果の送出間隔を秒で指定します。指定可能な値の範囲は 1 ～ 65535 です。指定がなければ、1 (秒) がセットされます。
+This method takes a hash object as an argument, the parameters are different depending on the mode. Besides, a callback function assigned to the [`onnotify`](#AlpsDevice-onnotify-event-handler) event handler is called whenever a sensor measured data notification is received, the data passed to the callback function is different depends on the mode.
+
+#### Parameters of Environment sensors mode
+
+Property     | Type    | Required | Description
+:------------|:--------|:---------|:------------
+`mode`       | Integer | Required | `0` (means "Environment sensors mode".)
+`interval`   | Integer | Optional | Measurement interval in second. The value must be in the range of `1` to `65535`. If this parameter is not specified, it is assumed that the value is set to `1` (second).
 
 ```JavaScript
 device.startMonitor({
-  mode    : 0, // 環境系センサーモード
-  interval: 1  // 送信間隔 (秒)
+  mode    : 0, // Environment sensors mode
+  interval: 1  // Interval (second)
 }).then(() => {
   device.onnotify = (data) => {
     console.log(JSON.stringify(data, null, '  '));
@@ -632,26 +653,26 @@ device.startMonitor({
 });
 ```
 
-受信データは、以下の通りです。
+The received data is as follows:
 
-プロパティ            | 型     | 説明 
-:--------------------|:-------|-----------------------------
-`pressure`           | Number | 大気圧 (hPa)
-`humidity`           | Number | 湿度 (%RH)
-`temperature`        | Number | 温度 (degC)
-`uv`                 | Number | UV (mW/cm^2)
-`ambient`            | Number | 太陽光またはハロゲンランプを光源とした場合の照度 (Lx)
-`ambientLed`         | Number | LED を光源とした場合の照度 (Lx)
-`ambientFluorescent` | Number | 蛍光灯を光源とした場合の照度 (Lx)
-`timeStamp`          | Object | 計測時間
- +- `day`            | Number | 日
- +- `month`          | Number | 月
- +- `year`           | Number | 西暦
- +- `millisecond`    | Number | ミリ秒
- +- `second`         | Number | 秒
- +- `minute`         | Number | 分
- +- `hour`           | Number | 時
-`dataIndex`          | Number | センサ計測シーケンス番号
+Property             | Type    | Description
+:--------------------|:--------|-----------------------------
+`pressure`           | Float   | Pressure (hPa)
+`humidity`           | Float   | Humidity (%RH)
+`temperature`        | Float   | Temperature (degC)
+`uv`                 | Float   | UV (mW/cm^2)
+`ambient`            | Float   | Ambient when sunlight or halogen lamp is the light source (Lx)
+`ambientLed`         | Float   | Ambient when LED is the light source (Lx)
+`ambientFluorescent` | Float   | Ambient when fluorescent lamp is the light source (Lx)
+`timeStamp`          | Object  | Measurement time
+ +- `day`            | Integer | Day 
+ +- `month`          | Integer | Month
+ +- `year`           | Integer | Year
+ +- `millisecond`    | Integer | Millisecond
+ +- `second`         | Integer | Second
+ +- `minute`         | Integer | Minute
+ +- `hour`           | Integer | Hour
+`dataIndex`          | Integer | Sequence number
 
 ```JavaScript
 {
@@ -675,21 +696,21 @@ device.startMonitor({
 }
 ```
 
-#### モーション系センサーモードのパラメータ
+#### Parameters of Motion sensors mode
 
-プロパティ           | 型     | 必須 | 説明
-:-------------------|:-------|:-----|:------------
-`mode`              | Number | 必須 | `1` 固定
-`interval`          | Number | 任意 | 計測結果の送出間隔をミリ秒で指定します。指定可能な値の範囲は 10 ～ 999 です。指定がなければ、200 (ミリ秒) がセットされます。
-`accelerationRange` | Number | 任意 | 加速度センサーの計測範囲を指定します。指定可能な値は `2`, `4`, `8`, `12`, `16` です。たとえば、`2` を指定すると、±2G の範囲で計測します。指定がなければ `2` がセットされます。
+Property     | Type    | Required | Description
+:------------|:--------|:---------|:------------
+`mode`       | Integer | Required | `1` (means "Motion sensors mode".)
+`interval`   | Integer | Optional | Measurement interval in millisecond. The value must be in the range of `10` to `999`. If this parameter is not specified, it is assumed that the value is set to `200` (msec).
+`accelerationRange` | Integer | Optional |  Acceleration Sensor Range. The value must be `2`, `4`, `8`, `12`, or `16`. For example, if this parameter is set to `2`, the Acceleration Sensor measures in the range of -2G to +2G. If this parameter is not specified, it is assumed that the value is set to `2`.
 
-パラメータ `interval` の単位がモードによって違う点に注意してください。環境系センサーモードでは単位が秒ですが、モーション系センサーモードでは単位はミリ秒となります。
+Note that the unit of the `interval` is different depending on the mode. The unit of the environment sensors mode is second, while the unit of the motion sensors mode is millisecond.
 
 ```JavaScript
 device.startMonitor({
-  mode             : 1,   // モーション系センサーモード
-  interval         : 200, // 送信間隔 (ミリ秒)
-  accelerationRange: 2    // 加速度センサー計測範囲 (G)
+  mode             : 1,   // Motion sensors mode
+  interval         : 200, // Interval (millisecond)
+  accelerationRange: 2    // Acceleration Sensor Range (G)
 }).then(() => {
   device.onnotify = (data) => {
     console.log(JSON.stringify(data, null, '  '));
@@ -699,24 +720,24 @@ device.startMonitor({
 });
 ```
 
-受信データは、以下の通りです。
+The received data is as follows:
 
-プロパティ        | 型     | 説明 
-:----------------|:-------|-----------------------------
-`geoMagnetic`    | Object | 地磁気センサーの情報
-+- `x`           | Number | x 軸地磁気 (uT)
-+- `y`           | Number | y 軸地磁気 (uT)
-+- `z`           | Number | z 軸地磁気 (uT)
-`acceleration`   | Object | 加速度センサーの情報
-+- `x`           | Number | x 軸加速度 (G)
-+- `y`           | Number | y 軸加速度 (G)
-+- `z`           | Number | z 軸加速度 (G)
-`timeStamp`      | Object | 計測時間
-+- `millisecond` | Number | ミリ秒
-+- `second`      | Number | 秒
-+- `minute`      | Number | 分
-+- `hour`        | Number | 時
-`dataIndex`      | Number | センサ計測シーケンス番号
+Property         | Type    | Description
+:----------------|:--------|-----------------------------
+`geoMagnetic`    | Object  | Geo-Magnetic
++- `x`           | Float   | Geo-Magnetic X (uT)
++- `y`           | Float   | Geo-Magnetic Y (uT)
++- `z`           | Float   | Geo-Magnetic Z (uT)
+`acceleration`   | Object  | Acceleration
++- `x`           | Float   | Acceleration X (G)
++- `y`           | Float   | Acceleration Y (G)
++- `z`           | Float   | Acceleration Z (G)
+`timeStamp`      | Object  | Measurement time
++- `millisecond` | Integer | Millisecond
++- `second`      | Integer | Second
++- `minute`      | Integer | Minute
++- `hour`        | Integer | Hour
+`dataIndex`      | Integer | Sequence number
 
 ```JavaScript
 {
@@ -740,21 +761,21 @@ device.startMonitor({
 }
 ```
 
-### <a id="AlpsDevice-stopMonitor-method">stopMonitor() メソッド</a>
+### <a id="AlpsDevice-stopMonitor-method">stopMonitor() method</a>
 
-`stopMonitor()` メソッドは、[`startMonitor()`](#AlpsDevice-startMonitor-method) メソッドによって開始されたセンサー情報モニターを停止します。このメソッドは `Promise` オブジェクトを返します。
+The `stopMonitor()` method stops the monitoring process started by the [`startMonitor()`](#AlpsDevice-startMonitor-method) method. This method returns a `Promise` object.
 
 ```JavaScript
 device.stopMonitor().then(() => {
-  console.log('モニターを停止しました。');
+  console.log('Stopped to monitor.');
 }).catch((error) => {
   console.error(error);
 });
 ```
 
-### <a id="AlpsDevice-getStatus-method">getStatus() メソッド</a>
+### <a id="AlpsDevice-getStatus-method">getStatus() method</a>
 
-`getStatus()` メソッドは、バッテリー電圧、エラー情報などのデバイスの状態を取得します。このメソッドは `Promise` オブジェクトを返します。
+The `getStatus()` method fetches the status of the device such as the battery voltage, error information, and so on. This method returns a `Promise` object.
 
 ```JavaScript
 device.getStatus().then((data) => {
@@ -764,7 +785,7 @@ device.getStatus().then((data) => {
 });
 ```
 
-上記コードは、以下のような結果を出力します：
+The code above outputs the result as follows:
 
 ```JavaScript
 {
@@ -782,35 +803,77 @@ device.getStatus().then((data) => {
 }
 ```
 
-受信データは、以下の通りです。
+The received data is as follows:
 
-プロパティ         | 型      | 説明
+Property          | Type    | Description
 :-----------------|:--------|-----------------------------
-`error`           | Object  | 
-+- `pressure`     | Boolean | 気圧異常 (異常なら `true`、正常なら `false` がセットされます)
-+- `uv`           | Boolean | UV 異常 (異常なら `true`、正常なら `false` がセットされます)
-+- `humidity`     | Boolean | 湿度異常 (異常なら `true`、正常なら `false` がセットされます)
-+- `magnetic`     | Boolean | 地磁気異常 (異常なら `true`、正常なら `false` がセットされます)
-+- `acceleration` | Boolean | 加速度異常 (異常なら `true`、正常なら `false` がセットされます)
-`rssi`            | Number  | モジュール側の受信 RSSI (単位: dBm)
-`battery`         | Number  | バッテリ電圧 (単位: mV)
-`memFull`         | Boolean | 内部メモリフルフラグ (フルなら `true`、そうでなければ `false` がセットされます)
-`ack`             | Number  | コマンドが正常に受け付けられたなら `1` (ACK)、コマンドの受付が許可されなかったら `2` (NACK)、それ以外(自動発行) なら `0` がセットされます。
+`error`           | Object  | Sensor error information
++- `pressure`     | Boolean | Pressure irregularity detection (`true`: Error, `false`: Normal)
++- `uv`           | Boolean | UV irregularity detection (`true`: Error, `false`: Normal)
++- `humidity`     | Boolean | Humidity irregularity detection (`true`: Error, `false`: Normal)
++- `magnetic`     | Boolean | Geomagnetic irregularity detection (`true`: Error, `false`: Normal)
++- `acceleration` | Boolean | Accelerometer irregularity detection  (`true`: Error, `false`: Normal)
+`rssi`            | Integer | RSSI (dBm)
+`battery`         | Integer | Battery voltage (mV)
+`memFull`         | Boolean | Flag if memory is full or not (`true`: Full, `false`: Not full)
+`ack`             | Integer | Command accept Ack/Nack. `1`: Command acceptance (ACK), `2`: Non acceptance (NACK), `0`: For other commands (automatic issue)
+
+### <a id="AlpsDevice-getDeviceName-method">getDeviceName() method</a>
+
+The `getDeviceName()` method fetches the device name (local name). This method returns a `Promise` object.
+
+```JavaScript
+device.getDeviceName().then((data) => {
+  console.log(JSON.stringify(data, null, '  '));
+}).catch((error) => {
+  console.error(error);
+});
+```
+
+The code above outputs the result as follows:
+
+```javascript
+{
+  "deviceName": "SNM00"
+}
+```
+
+The received data is as follows:
+
+Property          | Type    | Description
+:-----------------|:--------|-----------------------------
+`deviceName`      | String  | Device name (local name)
+
+### <a id="AlpsDevice-setDeviceName-method">setDeviceName(*prams*) method</a>
+
+The `setDeviceName()` method sets the device name (local name). This method return a `Promise` object. This method takes an argument which is a hash object containing the parameters as follows:
+
+Property     | Type   | Required | Description
+:------------|:-------|:---------|:------------ 
+`deviceName` | String | Required | Device Name (local name). Alphabet [a-zA-Z] and numbers [0-9], 1 - 18 characters.
+
+```JavaScript
+device.setDeviceName({deviceName: 'SNM01'}).then(() => {
+  console.log('Success');
+}).catch((error) => {
+  console.error(error);
+});
+```
 
 ---------------------------------------
-## <a id="AlpsAdvertisement-object">`AlpsAdvertisement` オブジェクト</a>
+## <a id="AlpsAdvertisement-object">`AlpsAdvertisement` object</a>
 
-`AlpsAdvertisement` オブジェクトは、デバイスが発するアドバタイズパケットのデータを表します。アドバタイズパケットのデータは、ビーコンモードによって異なります。
+The `AlpsAdvertisement` object represents an advertising packet. The data is different depending on the beacon mode.
 
-### <a id="AlpsAdvertisement-object-Normal">Normal Advertising モード</a>
+### <a id="AlpsAdvertisement-object-Normal">Normal Advertising Mode</a>
 
-プロパティ          | 型     | 説明 
-:------------------|:-------|-----------------------------
-`id`               | String | デバイスの ID
-`uuid`             | String | デバイスの UUID
-`address`          | String | デバイスのアドレス
-`localName`        | String | デバイスのローカル名
-`rssi`             | Number | RSSI
+Property       | Type    | Description
+:--------------|:--------|-----------------------------
+`id`           | String  | ID of the device
+`uuid`         | String  | UUID of iBeacon
+`address`      | String  | Address of the device
+`localName`    | String  | Local name of the device (device name)
+`rssi`         | Integer | RSSI
 
 ```JavaScript
 {
@@ -822,31 +885,31 @@ device.getStatus().then((data) => {
 }
 ```
 
-### <a id="AlpsAdvertisement-object-Sensor">Sensor Beacon モード</a>
+### <a id="AlpsAdvertisement-object-Sensor">Sensor Beacon Mode</a>
 
-Sensor Beacon モードには 2 つのフォーマットがあります。ひとつは、主に環境系センサーの情報を格納したフォーマット、もうひとつは、主にモーション系センサーの情報を格納したフォーマットです。
+The Sensor Beacon mode has two formats: Environment sensors format and Motion sensors format.
 
-#### 環境系センサーフォーマット
+#### <a id="Environment-sensors-format">Environment sensors format</a>
 
-プロパティ            | 型     | 説明 
-:--------------------|:-------|-----------------------------
-`id`                 | String | デバイスの ID
-`uuid`               | String | デバイスの UUID
-`address`            | String | デバイスのアドレス
-`localName`          | String | デバイスのローカル名
-`rssi`               | Number | RSSI
-`companyId`          | String | Bluetooth SIG に登録された企業 ID (`0272` 固定)
-`acceleration`       | Object | 加速度センサーの情報
-+- `x`               | Number | x 軸加速度 (G)
-+- `y`               | Number | y 軸加速度 (G)
-+- `z`               | Number | z 軸加速度 (G)
-`pressure`           | Number | 大気圧 (hPa)
-`humidity`           | Number | 湿度 (%RH)
-`temperature`        | Number | 温度 (degC)
-`uv`                 | Number | UV (mW/cm^2)
-`ambient`            | Number | 太陽光またはハロゲンランプを光源とした場合の照度 (Lx)
-`ambientLed`         | Number | LED を光源とした場合の照度 (Lx)
-`ambientFluorescent` | Number | 蛍光灯を光源とした場合の照度 (Lx)
+Property             | Type    | Description
+:--------------------|:--------|-----------------------------
+`id`                 | String  | ID of the device
+`uuid`               | String  | UUID of iBeacon
+`address`            | String  | Address of the device
+`localName`          | String  | Local name of the device (device name)
+`rssi`               | Integer | RSSI
+`companyId`          | String  | Company ID assigned by Bluetooth SIG (always `"0272"`)
+`acceleration`       | Object  | Acceleration
++- `x`               | Float   | Acceleration X (G)
++- `y`               | Float   | Acceleration Y (G)
++- `z`               | Float   | Acceleration Z (G)
+`pressure`           | Float   | Pressure (hPa)
+`humidity`           | Float   | Humidity (%RH)
+`temperature`        | Float   | Temperature (degC)
+`uv`                 | Float   | UV (mW/cm^2)
+`ambient`            | Float   | Ambient when sunlight or halogen lamp is the light source (Lx)
+`ambientLed`         | Float   | Ambient when LED is the light source (Lx)
+`ambientFluorescent` | Float   | Ambient when fluorescent lamp is the light source (Lx)
 
 ```JavaScript
 {
@@ -871,25 +934,25 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 }
 ```
 
-#### モーション系センサーフォーマット
+#### <a id="Motion-sensors-format">Motion sensors format</a>
 
-プロパティ      | 型     | 説明 
-:--------------|:-------|-----------------------------
-`id`           | String | デバイスの ID
-`uuid`         | String | デバイスの UUID
-`address`      | String | デバイスのアドレス
-`localName`    | String | デバイスのローカル名
-`rssi`         | Number | RSSI
-`companyId`    | String | Bluetooth SIG に登録された企業 ID (`0272` 固定)
-`acceleration` | Object | 加速度センサーの情報
-+- `x`         | Number | x 軸加速度 (G)
-+- `y`         | Number | y 軸加速度 (G)
-+- `z`         | Number | z 軸加速度 (G)
-`geoMagnetic`  | Object | 地磁気センサーの情報
-+- `x`         | Number | x 軸地磁気 (uT)
-+- `y`         | Number | y 軸地磁気 (uT)
-+- `z`         | Number | z 軸地磁気 (uT)
-`pressure`     | Number | 大気圧 (hPa)
+Property       | Type    | Description
+:--------------|:--------|-----------------------------
+`id`           | String  | ID of the device
+`uuid`         | String  | UUID of iBeacon
+`address`      | String  | Address of the device
+`localName`    | String  | Local name of the device (device name)
+`rssi`         | Integer | RSSI
+`companyId`    | String  | Company ID assigned by Bluetooth SIG (always `"0272"`)
+`acceleration` | Object  | Acceleration
++- `x`         | Float   | Acceleration X (G)
++- `y`         | Float   | Acceleration Y (G)
++- `z`         | Float   | Acceleration Z (G)
+`geoMagnetic`  | Object  | Geo-Magnetic
++- `x`         | Float   | Geo-Magnetic X (uT)
++- `y`         | Float   | Geo-Magnetic Y (uT)
++- `z`         | Float   | Geo-Magnetic Z (uT)
+`pressure`     | Float   | Pressure (hPa)
 
 ```JavaScript
 {
@@ -913,18 +976,18 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 }
 ```
 
-### <a id="AlpsAdvertisement-object-General">General Beacon モード</a>
+### <a id="AlpsAdvertisement-object-General">General Beacon Mode</a>
 
-プロパティ      | 型     | 説明 
-:--------------|:-------|-----------------------------
-`id`           | String | デバイスの ID
-`uuid`         | String | iBeacon の UUID
-`address`      | String | デバイスのアドレス
-`localName`    | String | デバイスのローカル名
-`rssi`         | Number | RSSI
-`companyId`    | String | Bluetooth SIG に登録された企業 ID (`0272` 固定)
-`major`        | Number | iBeacon の Major
-`minor`        | Number | iBeacon の Minor
+Property       | Type    | Description
+:--------------|:--------|-----------------------------
+`id`           | String  | ID of the device
+`uuid`         | String  | UUID of iBeacon
+`address`      | String  | Address of the device
+`localName`    | String  | Local name of the device (device name)
+`rssi`         | Integer | RSSI
+`companyId`    | String  | Company ID assigned by Bluetooth SIG (always `"0272"`)
+`major`        | Integer | Major of iBeacon
+`minor`        | Integer | Minor of iBeacon
 
 ```JavaScript
 {
@@ -940,22 +1003,25 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 ```
 
 ---------------------------------------
-## <a id="Release-note">リリースノート</a>
+## <a id="Release-note">Release Note</a>
 
+* v0.2.0 (2018-06-30)
+  * Deprecated the [`connected`](#AlpsDevice-properties) property of the [`AlpsDevice`](#AlpsDevice) object.
+  * Newly added the [`isConnected()`](#AlpsDevice-isConnected-method), [`getDeviceName()`](#AlpsDevice-getDeviceName-method), [`setDeviceName()`](#AlpsDevice-setDeviceName-method)  method.
+  * Newly created an English-version README.md (this document). The japanese version was renamed to [`README_ja.md`](README_ja.md).
 * v0.1.0 (2018-05-17)
-  * [`getStatus()`](#AlpsDevice-getStatus-method) メソッドを新たにサポートしました。
-
+  * Newly added the [`getStatus()`](#AlpsDevice-getStatus-method) method.
 * v0.0.1 (2017-05-08)
   * First public release
 
 ---------------------------------------
-## <a id="References">リファレンス</a>
+## <a id="References">References</a>
 
-* [アルプス電気 - センサネットワークモジュール 開発キット](http://www.alps.com/j/iotsmart-network/index.html)
-* [アルプス電気 - Sensor Network Module 評価キット Application Note / Command Guide](http://www.alps.com/j/iotsmart-network/pdf/msm_command_manual.pdf)
+* [ALPS Sensor Network Module Evaluation Kit](https://www.alps.com/e/iotsmart-network/)
+* [ALPS Sensor Network Module Evaluation Kit Application Note Command Guide](https://www.alps.com/e/iotsmart-network/pdf/msm_command_manual.pdf)
 
 ---------------------------------------
-## <a id="License">ライセンス</a>
+## <a id="License">License</a>
 
 The MIT License (MIT)
 

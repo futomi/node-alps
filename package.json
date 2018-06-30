@@ -1,7 +1,7 @@
 {
   "name": "node-alps",
-  "version": "0.1.0",
-  "description": "node-alps は、アルプス電気社製「センサネットワークモジュール 開発キット」に BLE でアクセスするための node モジュールです。",
+  "version": "0.2.0",
+  "description": "The node-alps is a Node.js module which allows you to communicate with the ALPS Sensor Network Module Evaluation Kit via BLE.",
   "main": "./lib/alps.js",
   "files": [
     "lib"
