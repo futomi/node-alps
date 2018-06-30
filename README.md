@@ -527,7 +527,7 @@ The `ondisconnect` event handler will be called when the connection with the dev
 
 Property   | Type    | Description
 :----------|:--------|:-----------
-`wasClean` | Boolean | If the connection was closed intentionally, that is, if the connection was closed because the [`disconnect()`](#EnvsensorDevice-disconnect-method) method was called, this value is `true`. Otherwise, this value is `false`.
+`wasClean` | Boolean | If the connection was closed intentionally, that is, if the connection was closed because the [`disconnect()`](#AlpsDevice-disconnect-method) method was called, this value is `true`. Otherwise, this value is `false`.
 
 ```JavaScript
 device.ondisconnect = (reason) => {
