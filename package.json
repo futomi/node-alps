@@ -1,6 +1,6 @@
 {
   "name": "node-alps",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The node-alps is a Node.js module which allows you to communicate with the ALPS Sensor Network Module Evaluation Kit via BLE.",
   "main": "./lib/alps.js",
   "files": [

@@ -1005,6 +1005,8 @@ Property       | Type    | Description
 ---------------------------------------
 ## <a id="Release-note">Release Note</a>
 
+* v0.2.1 (2018-07-24)
+  * Fixed the bug that the `idFilter` parameter of the [`discover()`](#Alps-discover-method) method did not work.
 * v0.2.0 (2018-06-30)
   * Deprecated the [`connected`](#AlpsDevice-properties) property of the [`AlpsDevice`](#AlpsDevice-object) object.
   * Newly added the [`isConnected()`](#AlpsDevice-isConnected-method), [`getDeviceName()`](#AlpsDevice-getDeviceName-method), [`setDeviceName()`](#AlpsDevice-setDeviceName-method)  method.
