@@ -1006,7 +1006,7 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 ## <a id="Release-note">リリースノート</a>
 
 * v0.2.1 (2018-07-24)
-  *  [`discover()`](#Alps-discover-method) メソッドの `idFilter` パラメーターが機能していなかったバグを改修しました。
+  *  [`discover()`](#Alps-discover-method) メソッドの `idFilter` パラメーターが機能していなかったバグを改修しました。 (thanks to [@yuyhiraka](https://github.com/yuyhiraka))
 * v0.2.0 (2018-06-30)
   * [`AlpsDevice`](#AlpsDevice) オブジェクトの [`connected`](#AlpsDevice-properties) プロパティを廃止予定にしました。
   * [`isConnected()`](#AlpsDevice-isConnected-method), [`getDeviceName()`](#AlpsDevice-getDeviceName-method), [`setDeviceName()`](#AlpsDevice-setDeviceName-method) メソッドを新たに追加しました。
