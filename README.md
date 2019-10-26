@@ -14,13 +14,19 @@ Note that this module is *not* an ALPS official SDK.
 ## Dependencies
 
 * [Node.js](https://nodejs.org/en/) 6 +
-* [noble](https://www.npmjs.com/package/noble)
+* [@abandonware/noble](https://github.com/abandonware/noble)
+
+See the document of the [@abandonware/noble](https://github.com/abandonware/noble) for details on installing the [@abandonware/noble](https://github.com/abandonware/noble).
+
+Note that the noble has to be run as root on most of Linux environments. See the the document of the [@abandonware/noble](https://github.com/abandonware/noble) for details.
+
+The early versions of this module depended on [noble](https://github.com/sandeepmistry/noble) for BLE handling. But the [noble](https://github.com/sandeepmistry/noble) seems not to support Node v10 or later versions. Now, this module is employing [@abandonware/noble](https://github.com/abandonware/noble), which was forked from [noble](https://github.com/sandeepmistry/noble). For the purouse of the backward compatibility, this module works with [noble](https://github.com/sandeepmistry/noble) on Node v8 or earlier versions.
 
 ## Installation
 
 ```
 $ cd ~
-$ npm install noble
+$ npm install @abandonware/noble
 $ npm install node-alps
 ```
 
@@ -1005,6 +1011,8 @@ Property       | Type    | Description
 ---------------------------------------
 ## <a id="Release-note">Release Note</a>
 
+* v0.3.0 (2019-10-26)
+  * Supported Node v10 or later versions thanks to [@abandonware/noble](https://github.com/abandonware/noble)
 * v0.2.1 (2018-07-24)
   * Fixed the bug that the `idFilter` parameter of the [`discover()`](#Alps-discover-method) method did not work. (thanks to [@yuyhiraka](https://github.com/yuyhiraka))
 * v0.2.0 (2018-06-30)
@@ -1027,7 +1035,7 @@ Property       | Type    | Description
 
 The MIT License (MIT)
 
-Copyright (c) 2017-2018 Futomi Hatano
+Copyright (c) 2017-2019 Futomi Hatano
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

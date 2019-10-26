@@ -14,13 +14,19 @@ node-alps は、アルプス電気社製「[センサネットワークモジュ
 ## 依存関係
 
 * [Node.js](https://nodejs.org/en/) 6 +
-* [noble](https://www.npmjs.com/package/noble)
+* [@abandonware/noble](https://github.com/abandonware/noble)
+
+[@abandonware/noble](https://github.com/abandonware/noble) のインストール方法については、[@abandonware/noble](https://github.com/abandonware/noble) のドキュメントを参照してください。
+
+noble はほとんどの Linux 環境では root 権限でないと動作しません。詳細は [@abandonware/noble](https://github.com/abandonware/noble) のドキュメントを参照してください。
+
+このモジュールの以前のバージョンでは BLE 操作のために [noble](https://github.com/sandeepmistry/noble) に依存していました。しかし [noble](https://github.com/sandeepmistry/noble) は Node v10 以降をサポートしていないようです。現在、このモジュールは、[noble](https://github.com/sandeepmistry/noble) からフォークされた [@abandonware/noble](https://github.com/abandonware/noble) を採用しています。下位互換性のために、このモジュールは、Node v8 以前の環境では [noble](https://github.com/sandeepmistry/noble) がインストールされた環境でも、これまで通り動作します。
 
 ## インストール
 
 ```
 $ cd ~
-$ npm install noble
+$ npm install @abandonware/noble
 $ npm install node-alps
 ```
 
@@ -1005,6 +1011,8 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 ---------------------------------------
 ## <a id="Release-note">リリースノート</a>
 
+* v0.3.0 (2019-10-24)
+  * [@abandonware/noble](https://github.com/abandonware/noble) を採用することで、Node v10 以降をサポートしました。
 * v0.2.1 (2018-07-24)
   *  [`discover()`](#Alps-discover-method) メソッドの `idFilter` パラメーターが機能していなかったバグを改修しました。 (thanks to [@yuyhiraka](https://github.com/yuyhiraka))
 * v0.2.0 (2018-06-30)
@@ -1027,7 +1035,7 @@ Sensor Beacon モードには 2 つのフォーマットがあります。ひと
 
 The MIT License (MIT)
 
-Copyright (c) 2017-2018 Futomi Hatano
+Copyright (c) 2017-2019 Futomi Hatano
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
